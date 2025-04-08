@@ -3,33 +3,47 @@ using UnityEngine;
 public class TargetDirection : MonoBehaviour
 {
     [SerializeField] private Rotator _rotator;
-    [SerializeField] private Transform _parking; 
-    [SerializeField] private Transform _parkingExit;
-    [SerializeField] private Transform _stockroom;
-    [SerializeField] private Transform _stockroomExit;
+    
+    private Vector3 _parking; 
+    private Vector3 _parkingExit;
+    private Vector3 _stockroom;
+    private Vector3 _stockroomExit;
+
+    public void SetPositionTargets(Transform parking, Transform parkingExit, Transform stockroom, Transform stockroomExit)
+    {
+        _parking = parking.position;
+        _parkingExit = parkingExit.position;
+        _stockroom = stockroom.position;
+        _stockroomExit = stockroomExit.position;
+    }
+
+    public void ChangeDirectionNewBase(Transform position)
+    {
+        _rotator.ChangeDirection(position.position);
+    }
 
     public void ChangeDirectionParkingExit()
     {
-        _rotator.ChangeDirection(_parkingExit.position);
+        _rotator.ChangeDirection(_parkingExit);
     }
 
-    public void ChangeDirectionResourcePosition(Vector3 position)
+    public void ChangeDirectionResourcePosition(Transform position)
     {
-        _rotator.ChangeDirection(position);
+        _rotator.ChangeDirection(position.position);
     }
     
     public void ChangeDirectionStockroomExit()
     {
-        _rotator.ChangeDirection(_stockroomExit.position);
+        _rotator.ChangeDirection(_stockroomExit);
     }
     
     public void ChangeDirectionStockroom()
     {
-        _rotator.ChangeDirection(_stockroom.position);
+        _rotator.ChangeDirection(_stockroom);
     }
     
     public void ChangeDirectionParking()
     {
-        _rotator.ChangeDirection(_parking.position);
+        _rotator.ChangeDirection(_parking);
     }
 }

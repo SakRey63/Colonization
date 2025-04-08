@@ -10,16 +10,20 @@ public class Bot : MonoBehaviour
     [SerializeField] private LiftingMechanism _liftingMechanism;
     [SerializeField] private ResourceTransfer _resourceTransfer;
     [SerializeField] private FlashingLight _flashingLight;
-    
-    private bool _isReleased = true;
+    [SerializeField] private BuilderBase _builderBase;
+
+    private bool _isDeliveredToBase;
+    private bool _isReleased;
     private bool _isUploaded;
     private bool _isMoving;
     private bool _isRotating;
     private Resource _resource;
-    
-    public bool IsReleased => _isReleased;
+    private bool _isBuildsNewBase;
+
+    public bool IsBuildsNewBase => _isBuildsNewBase;
 
     public event Action<Bot> Released;
+    public event Action<Base> FinishedBuildsNewBase;
 
     private void OnEnable()
     {
@@ -27,9 +31,11 @@ public class Bot : MonoBehaviour
         _botScanner.AchievedResource += RaisingResource;
         _botScanner.AchievedStockroom += UnloadingResource;
         _botScanner.AchievedWaitingPoint += ChangeStatus;
+        _botScanner.AchievedBoxBuilding += BuildBase;
         _liftingMechanism.AscentFinished += DeliveringResource;
         _liftingMechanism.Unloaded += DriveBack;
         _mover.DeliveredResource += ReturnToParking;
+        _builderBase.FinishedBuildsNewBase += EnterNewBase;
     }
 
     private void OnDisable()
@@ -38,14 +44,33 @@ public class Bot : MonoBehaviour
         _botScanner.AchievedResource -= RaisingResource;
         _botScanner.AchievedStockroom -= UnloadingResource;
         _botScanner.AchievedWaitingPoint -= ChangeStatus;
+        _botScanner.AchievedBoxBuilding -= BuildBase;
         _liftingMechanism.AscentFinished -= DeliveringResource;
         _liftingMechanism.Unloaded -= DriveBack;
         _mover.DeliveredResource -= ReturnToParking;
+        _builderBase.FinishedBuildsNewBase -= EnterNewBase;
     }
 
     private void Start()
     {
         _flashingLight.ChangeEffectWaiting();
+    }
+
+    public void ChangeStatusBuildsNewBase()
+    {
+        if (_isBuildsNewBase == false)
+        {
+            _isBuildsNewBase = true;
+        }
+        else
+        {
+            _isBuildsNewBase = false;
+        }
+    }
+
+    public void SetAllTargetPosition(Transform parking, Transform parkingExit, Transform stockroom, Transform stockroomExit)
+    {
+        _targetDirection.SetPositionTargets(parking, parkingExit, stockroom, stockroomExit);
     }
 
     public void SetTarget(Resource resource)
@@ -59,6 +84,44 @@ public class Bot : MonoBehaviour
         ChangeMovementRotation();
         
         _flashingLight.ChangeEffectFollowing();
+    }
+
+    public void MoveOnToBuildNewBase(Transform transformSpawn)
+    {
+        _isDeliveredToBase = false;
+
+        transform.parent = null;
+        
+        _builderBase.BuildsBox(transformSpawn);
+        
+        _targetDirection.ChangeDirectionNewBase(transformSpawn);
+        
+        ChangeMovementRotation();
+    }
+    
+    public void ReturnToParking()
+    {
+        _isDeliveredToBase = true;
+        
+        _targetDirection.ChangeDirectionParkingExit();
+
+        ChangeMovementRotation();
+    }
+    
+    private void EnterNewBase(Base newBase)
+    {
+        FinishedBuildsNewBase?.Invoke(newBase);
+        
+        _isReleased = false;
+        
+        newBase.ArrangeNewBots(this);
+    }
+
+    private void BuildBase(BoxBuilding boxBuilding)
+    {
+        ChangeMovementRotation();
+        
+        boxBuilding.CreateNewBase();
     }
 
     private void ChangeStatus()
@@ -95,22 +158,25 @@ public class Bot : MonoBehaviour
         }
     }
 
-    private void ReturnToParking()
-    {
-        _targetDirection.ChangeDirectionParking();
-
-        ChangeMovementRotation();
-    }
-
     private void ChooseDirection()
     {
-        if (_isUploaded == false)
+        if (_isDeliveredToBase)
         {
-            _targetDirection.ChangeDirectionResourcePosition(_resource.transform.position);
-        }
-        else
-        {
-            _targetDirection.ChangeDirectionStockroom();
+            if (_isUploaded == false)
+            {
+                if (_resource != null)
+                {
+                    _targetDirection.ChangeDirectionResourcePosition(_resource.transform);
+                }
+                else
+                {
+                    _targetDirection.ChangeDirectionParking();
+                }
+            }
+            else
+            {
+                _targetDirection.ChangeDirectionStockroom();
+            }
         }
     }
 
@@ -125,9 +191,9 @@ public class Bot : MonoBehaviour
 
     private void UnloadingResource(Stockroom stockroom)
     {
-        bool isUploaded = false;
-        
         ChangeMovementRotation();
+        
+        bool isUploaded = false;
         
         _liftingMechanism.ChangeElevator(_resource, isUploaded);
         

@@ -7,7 +7,7 @@ public class Spawner<T> : MonoBehaviour where T : MonoBehaviour
     [SerializeField] private int _poolMaxSize = 30;
     [SerializeField] private T _prefab;
 
-    private ObjectPool<T> _pool;
+    protected ObjectPool<T> _pool;
     
     protected void Awake()
     {

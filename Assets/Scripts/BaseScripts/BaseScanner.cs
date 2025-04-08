@@ -21,13 +21,13 @@ public class BaseScanner : MonoBehaviour
     private void Awake()
     {
         _boxSize = new Vector3(_maxX, _maxY, _maxZ);
-        
-        _allResourcesFound = new Dictionary<int, Resource>();
     }
     
     private IEnumerator RepeatedScanningTerritory()
     {
         WaitForSeconds delay = new WaitForSeconds(_delay);
+        
+        _allResourcesFound = new Dictionary<int, Resource>();
 
         while (enabled)
         {

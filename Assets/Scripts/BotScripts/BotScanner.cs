@@ -7,6 +7,7 @@ public class BotScanner : MonoBehaviour
     public event Action<Resource> AchievedResource;
     public event Action AchievedWaitingPoint;
     public event Action<Stockroom> AchievedStockroom;
+    public event Action<BoxBuilding> AchievedBoxBuilding;
    
     private void OnTriggerEnter(Collider other)
     {
@@ -29,6 +30,10 @@ public class BotScanner : MonoBehaviour
         else if (other.TryGetComponent<Parking>(out _))
         {
             AchievedWaitingPoint?.Invoke();
+        }
+        else if (other.TryGetComponent(out BoxBuilding boxBuilding))
+        {
+            AchievedBoxBuilding?.Invoke(boxBuilding);
         }
     }
 }

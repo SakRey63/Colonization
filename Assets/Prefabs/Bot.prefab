@@ -1,5 +1,83 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &86461625330771410
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1058702421750349127}
+  - component: {fileID: 2930837030096643965}
+  - component: {fileID: 6551169007816131619}
+  - component: {fileID: 2739683771967156881}
+  m_Layer: 0
+  m_Name: BuilderBase
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1058702421750349127
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86461625330771410}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.030000001, z: 1.415}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6174130440747680125}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2930837030096643965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86461625330771410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab3b65023baf9dc4f9359b00d4d812d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _spawnBoxBuilding: {fileID: 6551169007816131619}
+  _spawnNewBase: {fileID: 2739683771967156881}
+--- !u!114 &6551169007816131619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86461625330771410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8964b6163e7c830418689858a8537304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _poolCapaciti: 15
+  _poolMaxSize: 30
+  _prefab: {fileID: 3732884206211533677, guid: 4f12714d0565f2a4cb113ae51371c0d7, type: 3}
+--- !u!114 &2739683771967156881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86461625330771410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0a47810bf3abc44f9176c6280f6d091, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _poolCapaciti: 15
+  _poolMaxSize: 30
+  _prefab: {fileID: 3143593689064005721, guid: 0a41bd9710461bd45a8155218df66a90, type: 3}
 --- !u!1 &97903445133295302
 GameObject:
   m_ObjectHideFlags: 0
@@ -365,6 +443,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8021778527088588189}
+  - {fileID: 1058702421750349127}
   - {fileID: 2300251858188127026}
   - {fileID: 865738173358781519}
   - {fileID: 6556876409828279464}
@@ -417,6 +496,7 @@ MonoBehaviour:
   _liftingMechanism: {fileID: 8825197665116056563}
   _resourceTransfer: {fileID: 4550087982778991002}
   _flashingLight: {fileID: 4051675137338437379}
+  _builderBase: {fileID: 2930837030096643965}
 --- !u!114 &546780246847404909
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -429,8 +509,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eaee588951dbce4d852eadc4c5416c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 3
-  _delayDriveBack: 1.5
+  _moveSpeed: 6
+  _delayDriveBack: 1
 --- !u!114 &1616668835004987267
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -443,11 +523,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec67f0087325fd54daf99ceb70814d92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotator: {fileID: 0}
-  _parking: {fileID: 0}
-  _parkingExit: {fileID: 0}
-  _stockroom: {fileID: 0}
-  _stockroomExit: {fileID: 0}
+  _rotator: {fileID: 8515440096992710898}
 --- !u!114 &4550087982778991002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -472,7 +548,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 868cac3f0f2df3d4b9261740e53328c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotationSpeed: 8
+  _rotationSpeed: 9
 --- !u!1 &4169957263571076358
 GameObject:
   m_ObjectHideFlags: 0
