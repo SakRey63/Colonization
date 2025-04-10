@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Base : MonoBehaviour
@@ -10,7 +8,7 @@ public class Base : MonoBehaviour
     [SerializeField] private Stockroom _stockroom;
     [SerializeField] private Transform _areaScanningBase;
     [SerializeField] private Database _database;
-    [SerializeField] private BotSpawner _spawnerBot;
+    [SerializeField] private BotSpawner _botSpawner;
     [SerializeField] private SpawnerFlag _spawnerFlag;
     [SerializeField] private int _maxCountBots;
     [SerializeField] private int _minCountBots;
@@ -23,15 +21,22 @@ public class Base : MonoBehaviour
     private int _countBots;
     private bool _isBuilds;
     private bool _isFlagSet;
+    private bool _canBuildNow;
+    private bool _canCreateBotNow;
     
     public Transform AreaScanningBase => _areaScanningBase;
     public int CountBots => _countBots;
 
     public event Action<Bot> AssignedBot;
+    
+    private void Awake()
+    {
+        _scanner.SetAreaScan();
+    }
 
     private void OnEnable()
     {
-        _scanner.Detected += SetAllResource;
+        _scanner.DetectedResource += _database.ProcessDetectedResource;;
         _database.FoundedNewResource += AssignBot;
         _garage.FreeBot += AssignBot;
         _stockroom.AcceptedResource += ChangeCountResource;
@@ -39,20 +44,26 @@ public class Base : MonoBehaviour
 
     private void OnDisable()
     {
-        _scanner.Detected -= SetAllResource;
+        _scanner.DetectedResource -= _database.ProcessDetectedResource;
         _database.FoundedNewResource -= AssignBot;
         _garage.FreeBot -= AssignBot;
         _stockroom.AcceptedResource -= ChangeCountResource;
     }
 
-    private void Awake()
-    {
-        _scanner.SetAreaScan(_areaScanningBase);
-    }
-
     private void Update()
     {
-        ChooseStatus();
+        if (_canBuildNow)
+        {
+            Build();
+            
+            _canBuildNow = false;
+        }
+        else if (_canCreateBotNow)
+        {
+            CreateBot();
+            
+            _canCreateBotNow = false;
+        }
     }
 
     public void CreateFlag(Transform position)
@@ -84,7 +95,7 @@ public class Base : MonoBehaviour
         _baseView.SetNumberBase(number);
     }
     
-    public void ArrangeNewBots(Bot bot)
+    public void ArrangeBots(Bot bot)
     {
         bot.transform.parent = transform;
 
@@ -93,21 +104,11 @@ public class Base : MonoBehaviour
         _garage.AddBot(bot);
     }
 
-    public void ChangeStatus()
+    public void EnableBuildMode()
     {
         _isBuilds = true;
-    }
-
-    private void ChooseStatus()
-    {
-        if (_isBuilds)
-        {
-            Build();
-        }
-        else
-        {
-            CreateNewBot();
-        }
+        
+        CheckBuildAndCreateBotConditions();
     }
 
     private void Build()
@@ -119,10 +120,10 @@ public class Base : MonoBehaviour
             AssignedBot?.Invoke(bot);
             
             bot.MoveOnToBuildNewBase(_flag.transform);
-            
-            _spawnerFlag.ReturnInPool(_flag);
-            
+
             _stockroom.SpendResources(_basePrice);
+
+            _spawnerFlag.ReturnInPool(_flag);
 
             _countBots--;
 
@@ -131,31 +132,41 @@ public class Base : MonoBehaviour
             _isFlagSet = false;
 
             _isBuilds = false;
+            
+            CheckCreateNewBotCondition();
+        }
+    }
+    
+    private void CheckCreateNewBotCondition()
+    {
+        if (!_isBuilds && _countResources >= _botPrice && _countBots < _maxCountBots)
+        {
+            _canCreateBotNow = true;
         }
     }
 
-    private void CreateNewBot()
+    private void CreateBot()
     {
         if (_countResources >= _botPrice && _countBots < _maxCountBots)
         {
-            Bot bot = _spawnerBot.GetBot();
+            Bot bot = _botSpawner.GetBot();
             
-            ArrangeNewBots(bot);
+            ArrangeBots(bot);
 
             _stockroom.SpendResources(_botPrice);
         }
     }
 
-    private void SetAllResource(Dictionary<int, Resource> resources)
-    {
-        _database.DetermineStatusResource(resources);
-    }
-
     private void ChangeCountResource()
     {
-        _countResources = _stockroom.BaseResourceCount;
-        
-        _baseView.SetCountResource(_countResources);
+        if (_stockroom != null)
+        {
+            _countResources = _stockroom.BaseResourceCount;
+            
+            _baseView.SetCountResource(_countResources);
+            
+            CheckBuildAndCreateBotConditions();
+        }
     }
 
     private void AssignBot()
@@ -165,6 +176,21 @@ public class Base : MonoBehaviour
             Bot bot = _garage.GetBot();
                 
             bot.SetTarget(_database.GetFreeResource());
+        }
+        
+        CheckBuildAndCreateBotConditions();
+    }
+    
+    private void CheckBuildAndCreateBotConditions()
+    {
+        if (_isBuilds && _countResources >= _basePrice && _garage.CountFreeBots > 0)
+        {
+            _canBuildNow = true;
+        }
+        
+        if (!_isBuilds && _countResources >= _botPrice && _countBots < _maxCountBots)
+        {
+            _canCreateBotNow = true;
         }
     }
 }

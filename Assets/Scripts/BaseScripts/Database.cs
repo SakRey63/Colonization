@@ -20,19 +20,16 @@ public class Database : MonoBehaviour
         _freeResource = new Dictionary<int, Resource>();
         _assignedResource = new HashSet<int>();
     }
-
-    public void DetermineStatusResource(Dictionary<int, Resource> resources)
+    
+    public void ProcessDetectedResource(Resource resource)
     {
-        foreach(var resource in resources)
+        if (_assignedResource.Contains(resource.Index) == false && _freeResource.ContainsKey(resource.Index) == false)
         {
-            if (_assignedResource.Contains(resource.Key) == false && _freeResource.ContainsKey(resource.Key) == false)
-            {
-                _freeResource.Add(resource.Key, resource.Value);
+            _freeResource.Add(resource.Index, resource);
                 
-                _indexFreeResource.Add(resource.Key);
+            _indexFreeResource.Add(resource.Index);
                     
-                FoundedNewResource?.Invoke();
-            }
+            FoundedNewResource?.Invoke();
         }
     }
     

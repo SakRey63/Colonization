@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SpawnNewBase : Spawner<Base>
+public class SpawnerBase : Spawner<Base>
 {
     private Transform _transformSpawn;
 

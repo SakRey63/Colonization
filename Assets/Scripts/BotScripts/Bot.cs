@@ -11,7 +11,7 @@ public class Bot : MonoBehaviour
     [SerializeField] private ResourceTransfer _resourceTransfer;
     [SerializeField] private FlashingLight _flashingLight;
     [SerializeField] private BuilderBase _builderBase;
-
+    
     private bool _isDeliveredToBase;
     private bool _isReleased;
     private bool _isUploaded;
@@ -23,7 +23,7 @@ public class Bot : MonoBehaviour
     public bool IsBuildsNewBase => _isBuildsNewBase;
 
     public event Action<Bot> Released;
-    public event Action<Base> FinishedBuildsNewBase;
+    public event Action<Transform> ReadyToSpawnBase;
 
     private void OnEnable()
     {
@@ -35,7 +35,7 @@ public class Bot : MonoBehaviour
         _liftingMechanism.AscentFinished += DeliveringResource;
         _liftingMechanism.Unloaded += DriveBack;
         _mover.DeliveredResource += ReturnToParking;
-        _builderBase.FinishedBuildsNewBase += EnterNewBase;
+        _builderBase.FinishedBuildsBox += OnFinishedBuildsBox;
     }
 
     private void OnDisable()
@@ -48,7 +48,7 @@ public class Bot : MonoBehaviour
         _liftingMechanism.AscentFinished -= DeliveringResource;
         _liftingMechanism.Unloaded -= DriveBack;
         _mover.DeliveredResource -= ReturnToParking;
-        _builderBase.FinishedBuildsNewBase -= EnterNewBase;
+        _builderBase.FinishedBuildsBox -= OnFinishedBuildsBox;
     }
 
     private void Start()
@@ -108,13 +108,11 @@ public class Bot : MonoBehaviour
         ChangeMovementRotation();
     }
     
-    private void EnterNewBase(Base newBase)
+    private void OnFinishedBuildsBox(Transform transformBase)
     {
-        FinishedBuildsNewBase?.Invoke(newBase);
+        ReadyToSpawnBase?.Invoke(transformBase);
         
         _isReleased = false;
-        
-        newBase.ArrangeNewBots(this);
     }
 
     private void BuildBase(BoxBuilding boxBuilding)
@@ -187,19 +185,24 @@ public class Bot : MonoBehaviour
         _mover.SetBotMoveBack();
         
         _flashingLight.ChangeEffectFollowing();
+        
+        _botScanner.ResetUnloadingState();
     }
 
     private void UnloadingResource(Stockroom stockroom)
     {
-        ChangeMovementRotation();
-        
-        bool isUploaded = false;
-        
-        _liftingMechanism.ChangeElevator(_resource, isUploaded);
-        
-        _resourceTransfer.TransferResource(stockroom, _resource);
-
-        _resource = null;
+        if (_resource != null)
+        {
+            ChangeMovementRotation();
+                    
+            bool isUploaded = false;
+                    
+            _liftingMechanism.ChangeElevator(_resource, isUploaded);
+                    
+            _resourceTransfer.TransferResource(stockroom, _resource);
+            
+            _resource = null;
+        }
     }
 
     private void DeliveringResource()

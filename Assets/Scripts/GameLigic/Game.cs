@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 
 public class Game : MonoBehaviour
 {
     [SerializeField] private List<Base> _bases;
     [SerializeField] private Bot _firstBot;
+    [SerializeField] private Camera _camera;
+    [SerializeField] private BaseConstructionOrchestrator _baseConstructionOrchestrator;
     [SerializeField] private SpawnerResources _spawnerResources;
     [SerializeField] private SpawnerBaseView _spawnerBaseView;
     [SerializeField] private InputReader _inputReader;
@@ -26,33 +27,25 @@ public class Game : MonoBehaviour
 
     private void OnEnable()
     {
-        _inputReader.ClickedMouse += BuildNewBase;
+        _inputReader.ClickedMouse += HandleBaseClick;
         _inputReader.TurnToRight += SetRotationBase;
         _inputReader.TurnToLeft += SetRotationBase;
-
-        foreach (Base newBase in _bases)
-        {
-            newBase.AssignedBot += AddBotBuilder;
-        }
+        _baseConstructionOrchestrator.FinishedBuildsNewBase += AddNewBase;
     }
 
     private void OnDisable()
     {
-        _inputReader.ClickedMouse -= BuildNewBase;
+        _inputReader.ClickedMouse -= HandleBaseClick;
         _inputReader.TurnToRight -= SetRotationBase;
         _inputReader.TurnToLeft -= SetRotationBase;
-        
-        foreach (Base newBase in _bases)
-        {
-            newBase.AssignedBot -= AddBotBuilder;
-        }
+        _baseConstructionOrchestrator.FinishedBuildsNewBase -= AddNewBase;
     }
 
     private void Start()
     {
         StartCoroutine(RepeatResource());
         
-        _bases[0].ArrangeNewBots(_firstBot);
+        _bases[0].ArrangeBots(_firstBot);
 
         DisplayBaseInformation(_bases[0]);
     }
@@ -80,11 +73,11 @@ public class Game : MonoBehaviour
         text.gameObject.SetActive(false);
     }
     
-    private void BuildNewBase()
+    private void HandleBaseClick()
     {
         if (_builderBasePreview.IsChoosingPositions == false)
         {
-            FindBase();
+            FindBaseForBuilding();
         }
         else
         {
@@ -106,40 +99,37 @@ public class Game : MonoBehaviour
         }
     }
 
-    private void AddBotBuilder(Bot bot)
-    {
-        _botBuilder = bot;
-        _botBuilder.FinishedBuildsNewBase += AddNewBase;
-    }
-
     private void AddNewBase(Base newBase)
     {
-        _botBuilder.FinishedBuildsNewBase -= AddNewBase;
-        
-        newBase.AssignedBot += AddBotBuilder;
-        
         _bases.Add(newBase);
         
         DisplayBaseInformation(newBase);
     }
 
-    private void FindBase()
+    private void FindBaseForBuilding()
     {
-        Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out _hitInfo);
-        
-        if (_hitInfo.transform.TryGetComponent(out Base baseResource))
+        if (Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out _hitInfo))
         {
-            _baseResource = baseResource;
-            
-            if (_baseResource.CountBots > _minCountBots)
+            if (_hitInfo.transform.TryGetComponent(out Base clickedBase))
             {
-                _baseResource.ChangeStatus();
-                                
-                _builderBasePreview.CreateBasePreview(_baseResource.transform);
+                if (clickedBase.CountBots > _minCountBots)
+                {
+                    _baseResource = clickedBase;
+                            
+                    clickedBase.EnableBuildMode();
+                                            
+                    _builderBasePreview.CreateBasePreview(clickedBase.transform);
+                            
+                    _baseConstructionOrchestrator.PrepareNewBaseBuilding(clickedBase);
+                }
+                else
+                {
+                    StartCoroutine(OutputTextHint(_textFewBots)); 
+                }
             }
             else
             {
-                StartCoroutine(OutputTextHint(_textFewBots));
+                StartCoroutine(OutputTextHint(_textHint));
             }
         }
         else

@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class BotScanner : MonoBehaviour
 {
+    private bool _isUnloadingResource;
+    
     public event Action AchievedCheckPoint;
     public event Action<Resource> AchievedResource;
     public event Action AchievedWaitingPoint;
     public event Action<Stockroom> AchievedStockroom;
     public event Action<BoxBuilding> AchievedBoxBuilding;
-   
+    
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<ParkingExit>(out _))
@@ -23,8 +25,10 @@ public class BotScanner : MonoBehaviour
         {
             AchievedCheckPoint?.Invoke();
         }
-        else if (other.TryGetComponent(out Stockroom stockroom))
+        else if (other.TryGetComponent(out Stockroom stockroom) && _isUnloadingResource == false)
         {
+            _isUnloadingResource = true;
+            
              AchievedStockroom?.Invoke(stockroom);
         }
         else if (other.TryGetComponent<Parking>(out _))
@@ -35,5 +39,10 @@ public class BotScanner : MonoBehaviour
         {
             AchievedBoxBuilding?.Invoke(boxBuilding);
         }
+    }
+    
+    public void ResetUnloadingState()
+    {
+        _isUnloadingResource = false;
     }
 }

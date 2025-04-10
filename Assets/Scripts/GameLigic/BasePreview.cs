@@ -22,7 +22,11 @@ public class BasePreview : MonoBehaviour
 
     private void Update()
     {
-        MonitoredPosition();
+        if (_isMonitoring)
+        {
+            MonitoredPosition();
+        }
+        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -73,20 +77,17 @@ public class BasePreview : MonoBehaviour
 
     private void MonitoredPosition()
     {
-        if (_isMonitoring)
+        if (transform.position.x > _maxPosition - _deltaX || transform.position.x < _minPosition + _deltaX || transform.position.z > _maxPosition - _deltaZ || transform.position.z < _minPosition + _deltaZ)
         {
-             if (transform.position.x > _maxPosition - _deltaX || transform.position.x < _minPosition + _deltaX || transform.position.z > _maxPosition - _deltaZ || transform.position.z < _minPosition + _deltaZ)
-             {
-                 _renderer.material = _materialError;
+            _renderer.material = _materialError;
             
-                 _isPossibleBuild = false;
-             }
-             else
-             {
-                 _renderer.material = _materialPossibleBuild;
+            _isPossibleBuild = false;
+        }
+        else
+        {
+            _renderer.material = _materialPossibleBuild;
             
-                 _isPossibleBuild = true;
-             }
+            _isPossibleBuild = true;
         }
     }
 }

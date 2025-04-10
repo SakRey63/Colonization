@@ -3,6 +3,7 @@ using UnityEngine;
 public class BuilderBasePreview : MonoBehaviour
 {
     [SerializeField] private SpawnerBasePreview _spawnerBasePreview;
+    [SerializeField] private Camera _camera;
     
     private Transform _positionBuild;
     private RaycastHit _raycastHit;
@@ -17,7 +18,7 @@ public class BuilderBasePreview : MonoBehaviour
     {
         if (_isChoosingPositions)
         {
-            Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out _raycastHit);
+            Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out _raycastHit);
             
             if (_raycastHit.transform != null)
             {

@@ -6,8 +6,11 @@ public class SpawnBoxBuilding : Spawner<BoxBuilding>
 
     protected override void SetAction(BoxBuilding boxBuilding)
     {
-        boxBuilding.transform.position = _transformSpawn.position;
-        boxBuilding.transform.rotation = _transformSpawn.rotation;
+        if (_transformSpawn != null)
+        {
+            boxBuilding.transform.position = _transformSpawn.position;
+            boxBuilding.transform.rotation = _transformSpawn.rotation;
+        }
         
         base.SetAction(boxBuilding);
     }
@@ -15,7 +18,7 @@ public class SpawnBoxBuilding : Spawner<BoxBuilding>
     public BoxBuilding GetBoxBuilding(Transform transform)
     {
         _transformSpawn = transform;
-
+        
         return _pool.Get();
     }
 

@@ -20,7 +20,10 @@ public class Mover : MonoBehaviour
 
     private void Update()
     {
-        Move();
+        if (_isMoving)
+        {
+            Move();
+        }
     }
 
     private IEnumerator DriveBack()
@@ -52,9 +55,6 @@ public class Mover : MonoBehaviour
     
     private void Move()
     {
-        if (_isMoving)
-        {
-            transform.Translate(_directionMovement * _moveSpeed * Time.deltaTime, Space.Self);
-        }
+        transform.Translate(_directionMovement * _moveSpeed * Time.deltaTime, Space.Self);
     }
 }

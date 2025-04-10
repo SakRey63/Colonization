@@ -3,14 +3,10 @@ using Random = UnityEngine.Random;
 
 public class SpawnerResources : Spawner<Resource>
 {
-    [SerializeField] private float _minPositionX;
-    [SerializeField] private float _minPositionZ;
-    [SerializeField] private float _maxPositionX;
-    [SerializeField] private float _maxPositionZ;
+    [SerializeField] private float _spawnRadius;
     [SerializeField] private float _positionY;
 
     private Transform _transformSpawn;
-
     private Vector3 _positionSpawn;
     private Quaternion _quaternionSpawn = Quaternion.Euler(Vector3.zero);
     private int _index;
@@ -46,7 +42,8 @@ public class SpawnerResources : Spawner<Resource>
 
     private void SetRandomPosition()
     {
-        _positionSpawn = new Vector3(Random.Range(_transformSpawn.position.x + _minPositionX, _transformSpawn.position.x + _maxPositionX), _positionY,
-                        Random.Range(_transformSpawn.position.z + _minPositionZ, _transformSpawn.position.z + _maxPositionZ));
+        Vector2 randomCircle = Random.insideUnitCircle * _spawnRadius;
+        
+        _positionSpawn = new Vector3(_transformSpawn.position.x + randomCircle.x, _positionY, _transformSpawn.position.z + randomCircle.y);
     }
 }

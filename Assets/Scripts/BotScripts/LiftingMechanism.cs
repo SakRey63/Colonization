@@ -39,11 +39,8 @@ public class LiftingMechanism : MonoBehaviour
 
     public void ChangeElevator(Resource resource, bool isUploaded)
     {
-        if (_resource == null)
-        {
-            _resource = resource;
-        }
-
+        _resource = resource;
+        
         _isUploaded = isUploaded;
         
         StartCoroutine(WorkingElevator());

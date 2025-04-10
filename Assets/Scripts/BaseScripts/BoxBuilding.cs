@@ -5,14 +5,19 @@ using UnityEngine;
 public class BoxBuilding : MonoBehaviour
 {
     [SerializeField] private float _delayBulding;
+    
+    private WaitForSeconds _delayWaitForSeconds;
 
     public event Action FinishedBuild;
-    
+
+    private void Awake()
+    {
+        _delayWaitForSeconds = new WaitForSeconds(_delayBulding);
+    }
+
     private IEnumerator BuildBase()
     {
-        WaitForSeconds delay = new WaitForSeconds(_delayBulding);
-
-        yield return delay;
+        yield return _delayWaitForSeconds;
         
         FinishedBuild?.Invoke();
     }
