@@ -115,11 +115,11 @@ public class Bot : MonoBehaviour
         _isReleased = false;
     }
 
-    private void BuildBase(BoxBuilding boxBuilding)
+    private void BuildBase(BoxConstruction _boxConstruction)
     {
         ChangeMovementRotation();
         
-        boxBuilding.CreateNewBase();
+        _boxConstruction.CreateNewBase();
     }
 
     private void ChangeStatus()

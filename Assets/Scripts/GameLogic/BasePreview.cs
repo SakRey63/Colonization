@@ -31,7 +31,7 @@ public class BasePreview : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<Base>(out _)|| other.TryGetComponent<Flag>(out _) || other.TryGetComponent<BoxBuilding>(out _))
+        if (other.TryGetComponent<Base>(out _)|| other.TryGetComponent<Flag>(out _) || other.TryGetComponent<BoxConstruction>(out _))
         {
             _renderer.material = _materialError;
 
@@ -43,7 +43,7 @@ public class BasePreview : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<Base>(out _)|| other.TryGetComponent<Flag>(out _) || other.TryGetComponent<BoxBuilding>(out _))
+        if (other.TryGetComponent<Base>(out _)|| other.TryGetComponent<Flag>(out _) || other.TryGetComponent<BoxConstruction>(out _))
         {
             _renderer.material = _materialPossibleBuild;
 

@@ -5,27 +5,27 @@ public class BuilderBase : MonoBehaviour
 {
     [SerializeField] private SpawnBoxBuilding _spawnBoxBuilding;
     
-    private BoxBuilding _boxBuilding;
+    private BoxConstruction _boxConstruction;
     private Transform _transformBuildBase;
 
     public event Action<Transform> FinishedBuildsBox;
 
     public void BuildsBox(Transform transform)
     {
-        _boxBuilding = _spawnBoxBuilding.GetBoxBuilding(transform);
+        _boxConstruction = _spawnBoxBuilding.GetBoxBuilding(transform);
 
-        _transformBuildBase = _boxBuilding.transform;
+        _transformBuildBase = _boxConstruction.transform;
         
-        _boxBuilding.FinishedBuild += OnBoxBuilt;
+        _boxConstruction.FinishedBuild += OnBoxBuilt;
     }
 
     private void OnBoxBuilt()
     {
-        _boxBuilding.FinishedBuild -= OnBoxBuilt;
+        _boxConstruction.FinishedBuild -= OnBoxBuilt;
         
-        _spawnBoxBuilding.ReturnOnPoolBoxBuilding(_boxBuilding);
+        _spawnBoxBuilding.ReturnOnPoolBoxBuilding(_boxConstruction);
 
-        _boxBuilding = null;
+        _boxConstruction = null;
         
         FinishedBuildsBox?.Invoke(_transformBuildBase);
     }

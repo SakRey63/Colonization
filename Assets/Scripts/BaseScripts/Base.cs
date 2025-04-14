@@ -66,7 +66,7 @@ public class Base : MonoBehaviour
         }
     }
 
-    public void CreateFlag(Transform position)
+    public void SetFlag(Transform position)
     {
         position.position = new Vector3(position.position.x, 0, position.position.z);
         

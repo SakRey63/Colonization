@@ -1,29 +1,29 @@
 using UnityEngine;
 
-public class SpawnBoxBuilding : Spawner<BoxBuilding>
+public class SpawnBoxBuilding : Spawner<BoxConstruction>
 {
     private Transform _transformSpawn;
 
-    public BoxBuilding GetBoxBuilding(Transform transform)
+    public BoxConstruction GetBoxBuilding(Transform transform)
     {
         _transformSpawn = transform;
         
         return _pool.Get();
     }
 
-    public void ReturnOnPoolBoxBuilding(BoxBuilding boxBuilding)
+    public void ReturnOnPoolBoxBuilding(BoxConstruction boxConstruction)
     {
-        _pool.Release(boxBuilding); 
+        _pool.Release(boxConstruction); 
     }
     
-    protected override void SetSpawnPosition(BoxBuilding boxBuilding)
+    protected override void SetSpawnPosition(BoxConstruction boxConstruction)
     {
         if (_transformSpawn != null)
         {
-            boxBuilding.transform.position = _transformSpawn.position;
-            boxBuilding.transform.rotation = _transformSpawn.rotation;
+            boxConstruction.transform.position = _transformSpawn.position;
+            boxConstruction.transform.rotation = _transformSpawn.rotation;
         }
         
-        base.SetSpawnPosition(boxBuilding);
+        base.SetSpawnPosition(boxConstruction);
     }
 }

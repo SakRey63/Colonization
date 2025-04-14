@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class BoxBuilding : MonoBehaviour
+public class BoxConstruction : MonoBehaviour
 {
     [SerializeField] private float _delayBulding;
     

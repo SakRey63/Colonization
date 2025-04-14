@@ -10,7 +10,7 @@ public class Rotator : MonoBehaviour
 
     private void Update()
     {
-        Rotation();
+        Rotate();
     }
 
     public void ChangeRotation(bool isRotation)
@@ -23,7 +23,7 @@ public class Rotator : MonoBehaviour
         _lockAtTarget = target;
     }
     
-    private void Rotation()
+    private void Rotate()
     {
         if (_lockAtTarget != null && _isRotation)
         {

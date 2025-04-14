@@ -81,7 +81,7 @@ public class Game : MonoBehaviour
         {
             _builderBasePreview.ReturnToPoolBasePreview();
             
-            _baseResource.CreateFlag(_builderBasePreview.PositionBuild);
+            _baseResource.SetFlag(_builderBasePreview.PositionBuild);
             _baseResource = null;
         }
         else
