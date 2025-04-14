@@ -13,6 +13,22 @@ public class LiftingMechanism : MonoBehaviour
     public event Action AscentFinished;
     public event Action Unloaded;
 
+    public void UploadResource()
+    {
+        _isUploaded = false;
+
+        StartCoroutine(WorkingElevator());
+    }
+
+    public void SelectResource(Resource resource)
+    {
+        _resource = resource;
+        
+        _isUploaded = true;
+        
+        StartCoroutine(WorkingElevator());
+    }
+    
     private IEnumerator WorkingElevator()
     {
         WaitForSeconds delay = new WaitForSeconds(_delay);
@@ -29,20 +45,15 @@ public class LiftingMechanism : MonoBehaviour
         }
         else
         {
-            _resource.transform.parent = null;
-
-            _resource = null;
+            if (_resource != null)
+            {
+                _resource.transform.parent = null;
+                
+                _resource = null;
+                            
+                Unloaded?.Invoke();
+            }
             
-            Unloaded?.Invoke();
         }
-    }
-
-    public void ChangeElevator(Resource resource, bool isUploaded)
-    {
-        _resource = resource;
-        
-        _isUploaded = isUploaded;
-        
-        StartCoroutine(WorkingElevator());
     }
 }

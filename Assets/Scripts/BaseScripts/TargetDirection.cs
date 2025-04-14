@@ -17,7 +17,7 @@ public class TargetDirection : MonoBehaviour
         _stockroomExit = stockroomExit.position;
     }
 
-    public void ChangeDirectionNewBase(Transform position)
+    public void ChangeDirectionTarget(Transform position)
     {
         _rotator.ChangeDirection(position.position);
     }
@@ -25,11 +25,6 @@ public class TargetDirection : MonoBehaviour
     public void ChangeDirectionParkingExit()
     {
         _rotator.ChangeDirection(_parkingExit);
-    }
-
-    public void ChangeDirectionResourcePosition(Transform position)
-    {
-        _rotator.ChangeDirection(position.position);
     }
     
     public void ChangeDirectionStockroomExit()

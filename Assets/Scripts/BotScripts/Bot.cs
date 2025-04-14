@@ -20,10 +20,10 @@ public class Bot : MonoBehaviour
     private Resource _resource;
     private bool _isBuildsNewBase;
 
-    public bool IsBuildsNewBase => _isBuildsNewBase;
-
     public event Action<Bot> Released;
     public event Action<Transform> ReadyToSpawnBase;
+    
+    public bool IsBuildsNewBase => _isBuildsNewBase;
 
     private void OnEnable()
     {
@@ -94,7 +94,7 @@ public class Bot : MonoBehaviour
         
         _builderBase.BuildsBox(transformSpawn);
         
-        _targetDirection.ChangeDirectionNewBase(transformSpawn);
+        _targetDirection.ChangeDirectionTarget(transformSpawn);
         
         ChangeMovementRotation();
     }
@@ -144,7 +144,7 @@ public class Bot : MonoBehaviour
             _isMoving = false;
             
             _rotator.ChangeRotation(_isRotating);
-            _mover.ChangeMove(_isMoving);
+            _mover.StoppedMovement();
         }
         else
         {
@@ -152,7 +152,7 @@ public class Bot : MonoBehaviour
             _isMoving = true;
             
             _rotator.ChangeRotation(_isRotating);
-            _mover.ChangeMove(_isMoving);
+            _mover.MoveTarget();
         }
     }
 
@@ -164,7 +164,7 @@ public class Bot : MonoBehaviour
             {
                 if (_resource != null)
                 {
-                    _targetDirection.ChangeDirectionResourcePosition(_resource.transform);
+                    _targetDirection.ChangeDirectionTarget(_resource.transform);
                 }
                 else
                 {
@@ -195,9 +195,7 @@ public class Bot : MonoBehaviour
         {
             ChangeMovementRotation();
                     
-            bool isUploaded = false;
-                    
-            _liftingMechanism.ChangeElevator(_resource, isUploaded);
+            _liftingMechanism.UploadResource();
                     
             _resourceTransfer.TransferResource(stockroom, _resource);
             
@@ -218,11 +216,9 @@ public class Bot : MonoBehaviour
     {
         if (_resource != null && _resource.Index == resource.Index)
         {
-            bool isUploaded = true;
-            
             ChangeMovementRotation();
             
-            _liftingMechanism.ChangeElevator(resource, isUploaded);
+            _liftingMechanism.SelectResource(resource);
             
             _flashingLight.ChangeEffectWork();
         }

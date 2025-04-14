@@ -10,6 +10,11 @@ public class BaseScanner : MonoBehaviour
     
     public event Action<Resource> DetectedResource;
     
+    public void SetAreaScan()
+    {
+        StartCoroutine(RepeatedScanningTerritory());
+    }
+    
     private IEnumerator RepeatedScanningTerritory()
     {
         WaitForSeconds delay = new WaitForSeconds(_delay);
@@ -20,11 +25,6 @@ public class BaseScanner : MonoBehaviour
             
             yield return delay;
         }
-    }
-    
-    public void SetAreaScan()
-    {
-        StartCoroutine(RepeatedScanningTerritory());
     }
 
     private void ScanTerritory()

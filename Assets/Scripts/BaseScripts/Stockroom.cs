@@ -8,9 +8,9 @@ public class Stockroom : MonoBehaviour
     
     private List<Resource> _baseResources;
 
-    public int BaseResourceCount => _baseResources.Count;
-    
     public event Action AcceptedResource;
+    
+    public int BaseResourceCount => _baseResources.Count;
 
     private void Awake()
     {
@@ -33,7 +33,7 @@ public class Stockroom : MonoBehaviour
         
         _baseResources.Add(resource);
         
-        resource.ReturnToPool();
+        resource.Reset();
         
         AcceptedResource?.Invoke();
     }

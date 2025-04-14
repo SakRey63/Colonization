@@ -8,20 +8,18 @@ public class BaseConstructionOrchestrator : MonoBehaviour
     private Base _baseToBuildFrom;
     private Bot _buildingBot;
     
-    public event Action<Base> FinishedBuildsNewBase;
+    public event Action<Base, BaseConstructionOrchestrator> FinishedBuildsNewBase;
 
-    private void OnDisable()
+    public void Reset()
     {
-        
-        if (_baseToBuildFrom != null)
-        {
-            _baseToBuildFrom.AssignedBot -= SubscribeToBotReadyToSpawn;
-        }
+        _buildingBot = null;
+        _baseToBuildFrom = null;
     }
-    
+
     public void PrepareNewBaseBuilding(Base baseToBuild)
     {
         _baseToBuildFrom = baseToBuild;
+        
         _baseToBuildFrom.AssignedBot += SubscribeToBotReadyToSpawn;
     }
 
@@ -29,11 +27,13 @@ public class BaseConstructionOrchestrator : MonoBehaviour
     {
         baseToAdd.ArrangeBots(botToAdd);
         
-        FinishedBuildsNewBase?.Invoke(baseToAdd);
+        FinishedBuildsNewBase?.Invoke(baseToAdd, this);
     }
     
     private void SubscribeToBotReadyToSpawn(Bot builderBot)
     {
+        _baseToBuildFrom.AssignedBot -= SubscribeToBotReadyToSpawn;
+        
         _buildingBot = builderBot;
         
         builderBot.ReadyToSpawnBase += SpawnNewBaseAtPosition;
@@ -48,10 +48,6 @@ public class BaseConstructionOrchestrator : MonoBehaviour
             Base newBase = _spawnerBase.GetNewBase(spawnPosition);
             
             AddBotToBase(newBase, _buildingBot);
-            
-            _baseToBuildFrom.AssignedBot -= SubscribeToBotReadyToSpawn;
-
-            _baseToBuildFrom = null;
         }
     }
 }

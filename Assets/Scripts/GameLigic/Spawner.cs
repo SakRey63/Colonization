@@ -13,7 +13,7 @@ public class Spawner<T> : MonoBehaviour where T : MonoBehaviour
     {
         _pool = new ObjectPool<T>(
             createFunc: () => Instantiate(_prefab),
-            actionOnGet: (obj) => SetAction(obj),
+            actionOnGet: (obj) => SetSpawnPosition(obj),
             actionOnRelease: (obj) => obj.gameObject.SetActive(false),
             actionOnDestroy: (obj) => Destroy(obj),
             collectionCheck: true,
@@ -21,18 +21,8 @@ public class Spawner<T> : MonoBehaviour where T : MonoBehaviour
             maxSize: _poolMaxSize);
     }
     
-    protected virtual void SetAction(T obj)
+    protected virtual void SetSpawnPosition(T obj)
     {
         obj.gameObject.SetActive(true);
-    }
-    
-    protected void GetGameObject()
-    {
-        _pool.Get();
-    }
-
-    protected void Release(T obj)
-    {
-        _pool.Release(obj);
     }
 }

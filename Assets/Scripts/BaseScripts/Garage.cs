@@ -5,26 +5,26 @@ using UnityEngine;
 public class Garage : MonoBehaviour
 {
     [SerializeField] private List<Bot> _allBots;
-    [SerializeField] private Transform _parkingPositionBot;
-    [SerializeField] private Transform _parkingExitPositionBot;
-    [SerializeField] private Transform _stockroomExitPositionBot;
-    [SerializeField] private Transform _stockroomPositionBot;
-    [SerializeField] private float _distanceX;
+    [SerializeField] private Transform[] _parkingsPositionBot;
+    [SerializeField] private Transform[] _parkingsExitsPositionBot;
+    [SerializeField] private Transform[] _stockroomsExitsPositionBot;
+    [SerializeField] private Transform[] _stockroomsPositionsBot;
 
     private Transform _parkingPosition;
     private Transform _parkingExitPosition;
     private Transform _stockroomExitPosition;
     private Transform _stockroomPosition;
+    private int _indexPosition;
     
     private Queue<Bot> _freeBots;
 
-    public int CountFreeBots => _freeBots.Count;
-    
     public event Action FreeBot;
+    
+    public int CountFreeBots => _freeBots.Count;
 
     private void Awake()
     {
-        CreateStartsPosition();
+        CreateStartsPosition(_indexPosition);
         
         _allBots = new List<Bot>();
         _freeBots = new Queue<Bot>();
@@ -45,8 +45,8 @@ public class Garage : MonoBehaviour
         }
         
         bot.SetAllTargetPosition(_parkingPosition, _parkingExitPosition, _stockroomPosition, _stockroomExitPosition);
-        
-        ChangeAllPositionsNextBot();
+
+        CreateStartsPosition(_indexPosition);
         
         _allBots.Add(bot);
         
@@ -90,32 +90,28 @@ public class Garage : MonoBehaviour
         foreach (Bot bot in _allBots)
         {
             bot.SetAllTargetPosition(_parkingPosition, _parkingExitPosition, _stockroomPosition, _stockroomExitPosition);
-
-            ChangeAllPositionsNextBot();
+            
+            CreateStartsPosition(_indexPosition);
         }
     }
 
-    private void CreateStartsPosition()
+    private void CreateStartsPosition(int index)
     {
-        _parkingPosition = _parkingPositionBot;
-        _parkingExitPosition = _parkingExitPositionBot;
-        _stockroomPosition = _stockroomPositionBot;
-        _stockroomExitPosition = _stockroomExitPositionBot;
+        _parkingPosition = _parkingsPositionBot[index];
+        _parkingExitPosition = _parkingsExitsPositionBot[index];
+        _stockroomPosition = _stockroomsPositionsBot[index];
+        _stockroomExitPosition = _stockroomsExitsPositionBot[index];
+
+        _indexPosition++;
     }
 
     private void ResetAllPosition()
     {
-        CreateStartsPosition();
+        _indexPosition = 0;
+
+        CreateStartsPosition(_indexPosition);
         
         SetBot();
-    }
-
-    private void ChangeAllPositionsNextBot()
-    {
-        _parkingPosition.position = new Vector3(_parkingPosition.position.x - _distanceX, _parkingPosition.position.y, _parkingPosition.position.z);
-        _parkingExitPosition.position = new Vector3(_parkingExitPosition.position.x - _distanceX, _parkingExitPosition.position.y, _parkingExitPosition.position.z);
-        _stockroomPosition.position = new Vector3(_stockroomPosition.position.x - _distanceX, _stockroomPosition.position.y, _stockroomPosition.position.z);
-        _stockroomExitPosition.position = new Vector3(_stockroomExitPosition.position.x - _distanceX, _stockroomExitPosition.position.y, _stockroomExitPosition.position.z);
     }
 
     private void ChangeStatus(Bot bot)

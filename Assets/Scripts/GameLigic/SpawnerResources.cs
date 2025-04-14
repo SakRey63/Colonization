@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -5,45 +6,60 @@ public class SpawnerResources : Spawner<Resource>
 {
     [SerializeField] private float _spawnRadius;
     [SerializeField] private float _positionY;
-
-    private Transform _transformSpawn;
-    private Vector3 _positionSpawn;
+    [SerializeField] private float _delaySpawnResource;
+    [SerializeField] private Transform _transformSpawn;
+    
     private Quaternion _quaternionSpawn = Quaternion.Euler(Vector3.zero);
     private int _index;
 
-    protected override void SetAction(Resource resource)
+    private void Start()
+    {
+        StartCoroutine(RepeatResource());
+    }
+
+    public void SetAreaResource()
+    {
+        _pool.Get();
+    }
+    
+    protected override void SetSpawnPosition(Resource resource)
     {
         _index++;
         
-        SetRandomPosition();
+        GetRandomPosition();
         
         resource.Delivered += ReleaseResource;
         
-        resource.transform.position = _positionSpawn;
+        resource.transform.position = GetRandomPosition();
         resource.transform.rotation = _quaternionSpawn;
         resource.SetIndex(_index);
         
-        base.SetAction(resource);
+        base.SetSpawnPosition(resource);
     }
-
-    public void SetAreaResource(Transform position)
+    
+    private IEnumerator RepeatResource()
     {
-        _transformSpawn = position;
-        
-        GetGameObject();
+        WaitForSeconds delay = new WaitForSeconds(_delaySpawnResource);
+
+        while (enabled)
+        {
+            SetAreaResource();
+
+            yield return delay;
+        }
     }
 
     private void ReleaseResource(Resource resource)
     {
         resource.Delivered -= ReleaseResource;
         
-        Release(resource);
+        _pool.Release(resource);
     }
 
-    private void SetRandomPosition()
+    private Vector3 GetRandomPosition()
     {
         Vector2 randomCircle = Random.insideUnitCircle * _spawnRadius;
         
-        _positionSpawn = new Vector3(_transformSpawn.position.x + randomCircle.x, _positionY, _transformSpawn.position.z + randomCircle.y);
+        return new Vector3(_transformSpawn.position.x + randomCircle.x, _positionY, _transformSpawn.position.z + randomCircle.y);
     }
 }

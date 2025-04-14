@@ -5,31 +5,29 @@ using UnityEngine;
 public class Resource : MonoBehaviour
 {
     [SerializeField] private float _delay;
-    
-    private int _index;
 
-    public int Index => _index;
-    
     public event Action<Resource> Delivered;
-
+    
+    public int Index { get; private set; }
+    
+    public void Reset()
+    {
+        Index = 0;
+                
+        StartCoroutine(WaitingСall());
+    }
+        
+    public void SetIndex(int index)
+    {
+        Index = index;
+    }
+    
     private IEnumerator WaitingСall()
     {
         WaitForSeconds delay = new WaitForSeconds(_delay);
-
+    
         yield return delay;
-        
+            
         Delivered?.Invoke(this);
-    }
-
-    public void SetIndex(int index)
-    {
-        _index = index;
-    }
-
-    public void ReturnToPool()
-    {
-        _index = 0;
-        
-        StartCoroutine(WaitingСall());
     }
 }

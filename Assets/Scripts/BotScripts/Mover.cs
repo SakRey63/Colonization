@@ -7,54 +7,61 @@ public class Mover : MonoBehaviour
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _delayDriveBack;
     
-    private bool _isMoving;
     private Vector3 _directionMovementForward = Vector3.forward;
-    private Vector3 _directionMovementBack = -Vector3.forward;
-    private Vector3 _directionMovement;
+    private Coroutine _coroutine;
+    
     public event Action DeliveredResource;
 
-    private void Awake()
+    public void MoveTarget()
     {
-        _directionMovement = _directionMovementForward;
+        _coroutine = StartCoroutine(MoveTo());
     }
 
-    private void Update()
+    public void StoppedMovement()
     {
-        if (_isMoving)
+        if (_coroutine != null)
         {
-            Move();
+            StopCoroutine(_coroutine);
         }
-    }
-
-    private IEnumerator DriveBack()
-    {
-        WaitForSeconds delay = new WaitForSeconds(_delayDriveBack);
-
-        _isMoving = true;
-
-        _directionMovement = _directionMovementBack;
-
-        yield return delay;
-
-        _isMoving = false;
-
-        _directionMovement = _directionMovementForward;
-        
-        DeliveredResource?.Invoke();
-    }
-    
-    public void ChangeMove(bool isMoving)
-    {
-        _isMoving = isMoving;
     }
 
     public void SetBotMoveBack()
     {
-        StartCoroutine(DriveBack());
+        _coroutine = StartCoroutine(DriveBack());
     }
     
+    private IEnumerator DriveBack()
+    {
+        _directionMovementForward = -Vector3.forward;
+
+        float currentTime = 0;
+
+        while (currentTime < _delayDriveBack)
+        {
+            currentTime += Time.deltaTime;
+            
+            Move();
+            
+            yield return null;
+        }
+
+        _directionMovementForward = Vector3.forward;
+        
+        DeliveredResource?.Invoke();
+    }
+
+    private IEnumerator MoveTo()
+    {
+        while (enabled)
+        {
+            Move();
+            
+            yield return null;
+        }
+    }
+
     private void Move()
     {
-        transform.Translate(_directionMovement * _moveSpeed * Time.deltaTime, Space.Self);
+        transform.Translate(_directionMovementForward * _moveSpeed * Time.deltaTime, Space.Self);
     }
 }

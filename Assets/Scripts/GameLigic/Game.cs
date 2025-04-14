@@ -8,12 +8,10 @@ public class Game : MonoBehaviour
     [SerializeField] private List<Base> _bases;
     [SerializeField] private Bot _firstBot;
     [SerializeField] private Camera _camera;
-    [SerializeField] private BaseConstructionOrchestrator _baseConstructionOrchestrator;
+    [SerializeField] private SpawnerBaseConstructionOrchestrator _spawnerBaseConstructionOrchestrator;
     [SerializeField] private SpawnerResources _spawnerResources;
-    [SerializeField] private SpawnerBaseView _spawnerBaseView;
     [SerializeField] private InputReader _inputReader;
     [SerializeField] private BuilderBasePreview _builderBasePreview;
-    [SerializeField] private float _delaySpawnResource;
     [SerializeField] private float _delayOutputTextHint;
     [SerializeField] private TextMeshProUGUI _textHint;
     [SerializeField] private TextMeshProUGUI _textFewBots;
@@ -23,14 +21,14 @@ public class Game : MonoBehaviour
     private int _numberBase = 1;
     private RaycastHit _hitInfo;
     private Base _baseResource;
-    private Bot _botBuilder;
+    private HashSet<int> _numbersUsedBases;
+    private Coroutine _coroutineHint;
 
     private void OnEnable()
     {
         _inputReader.ClickedMouse += HandleBaseClick;
         _inputReader.TurnToRight += SetRotationBase;
         _inputReader.TurnToLeft += SetRotationBase;
-        _baseConstructionOrchestrator.FinishedBuildsNewBase += AddNewBase;
     }
 
     private void OnDisable()
@@ -38,30 +36,20 @@ public class Game : MonoBehaviour
         _inputReader.ClickedMouse -= HandleBaseClick;
         _inputReader.TurnToRight -= SetRotationBase;
         _inputReader.TurnToLeft -= SetRotationBase;
-        _baseConstructionOrchestrator.FinishedBuildsNewBase -= AddNewBase;
+    }
+
+    private void Awake()
+    {
+        _numbersUsedBases = new HashSet<int>();
     }
 
     private void Start()
     {
-        StartCoroutine(RepeatResource());
-        
         _bases[0].ArrangeBots(_firstBot);
 
         DisplayBaseInformation(_bases[0]);
     }
     
-    private IEnumerator RepeatResource()
-    {
-        WaitForSeconds delay = new WaitForSeconds(_delaySpawnResource);
-
-        while (enabled)
-        {
-            SetAreaSpawnResources();
-
-            yield return delay;
-        }
-    }
-
     private IEnumerator OutputTextHint(TextMeshProUGUI text)
     {
         WaitForSeconds delay = new WaitForSeconds(_delayOutputTextHint);
@@ -71,6 +59,8 @@ public class Game : MonoBehaviour
         yield return delay;
         
         text.gameObject.SetActive(false);
+
+        _coroutineHint = null;
     }
     
     private void HandleBaseClick()
@@ -92,18 +82,25 @@ public class Game : MonoBehaviour
             _builderBasePreview.ReturnToPoolBasePreview();
             
             _baseResource.CreateFlag(_builderBasePreview.PositionBuild);
+            _baseResource = null;
         }
         else
         {
-            StartCoroutine(OutputTextHint(_textErrorBuilds));
+            SetOutputTextHint(_textErrorBuilds);
         }
     }
 
-    private void AddNewBase(Base newBase)
+    private void AddNewBase(Base newBase, BaseConstructionOrchestrator baseConstructionOrchestrator)
     {
+        baseConstructionOrchestrator.FinishedBuildsNewBase -= AddNewBase;
+
+        _numbersUsedBases.Remove(newBase.NumberBase);
+        
         _bases.Add(newBase);
         
         DisplayBaseInformation(newBase);
+
+        _spawnerBaseConstructionOrchestrator.ReturnInPool(baseConstructionOrchestrator);
     }
 
     private void FindBaseForBuilding()
@@ -119,22 +116,54 @@ public class Game : MonoBehaviour
                     clickedBase.EnableBuildMode();
                                             
                     _builderBasePreview.CreateBasePreview(clickedBase.transform);
-                            
-                    _baseConstructionOrchestrator.PrepareNewBaseBuilding(clickedBase);
+
+                    if (_numbersUsedBases.Contains(clickedBase.NumberBase) == false)
+                    {
+                        _numbersUsedBases.Add(clickedBase.NumberBase);
+                        
+                        BaseConstructionOrchestrator baseConstructionOrchestrator = _spawnerBaseConstructionOrchestrator.GetBaseConstructionOrchestrator();
+                                                
+                        baseConstructionOrchestrator.PrepareNewBaseBuilding(clickedBase);
+                                            
+                        baseConstructionOrchestrator.FinishedBuildsNewBase += AddNewBase;
+                    }
                 }
                 else
                 {
-                    StartCoroutine(OutputTextHint(_textFewBots)); 
+                    SetOutputTextHint(_textFewBots);
                 }
             }
             else
             {
-                StartCoroutine(OutputTextHint(_textHint));
+                SetOutputTextHint(_textHint);
             }
         }
         else
         {
-            StartCoroutine(OutputTextHint(_textHint)); 
+            SetOutputTextHint(_textHint);
+        }
+    }
+
+    private void DisableAllTextHint()
+    {
+        _textHint.gameObject.SetActive(false);
+        _textFewBots.gameObject.SetActive(false);
+        _textErrorBuilds.gameObject.SetActive(false);
+    }
+
+    private void SetOutputTextHint(TextMeshProUGUI text)
+    {
+        if (_coroutineHint != null)
+        {
+            StopCoroutine(_coroutineHint);
+
+            DisableAllTextHint();
+                        
+            _coroutineHint = StartCoroutine(OutputTextHint(text));
+        }
+        else
+        {
+            _coroutineHint = StartCoroutine(OutputTextHint(text));
         }
     }
 
@@ -143,19 +172,9 @@ public class Game : MonoBehaviour
         _builderBasePreview.SetRotationBase(rotationAngle);
     }
 
-    private void SetAreaSpawnResources()
-    {
-        foreach (Base playerBase in _bases)
-        {
-            _spawnerResources.SetAreaResource(playerBase.AreaScanningBase);
-        }
-    }
-
     private void DisplayBaseInformation(Base toBase)
     {
-        BaseView baseView = _spawnerBaseView.GetTextBaseInfo();
-
-        toBase.CreateDisplayView(baseView, _numberBase);
+        toBase.CreateDisplayView(_numberBase, _camera);
                 
         _numberBase++;
     }

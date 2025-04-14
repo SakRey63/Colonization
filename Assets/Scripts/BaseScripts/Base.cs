@@ -14,8 +14,8 @@ public class Base : MonoBehaviour
     [SerializeField] private int _minCountBots;
     [SerializeField] private int _botPrice;
     [SerializeField] private int _basePrice;
+    [SerializeField] private BaseView _baseView;
 
-    private BaseView _baseView;
     private Flag _flag;
     private int _countResources;
     private int _countBots;
@@ -24,10 +24,10 @@ public class Base : MonoBehaviour
     private bool _canBuildNow;
     private bool _canCreateBotNow;
     
-    public Transform AreaScanningBase => _areaScanningBase;
-    public int CountBots => _countBots;
-
     public event Action<Bot> AssignedBot;
+    
+    public int CountBots => _countBots;
+    public int NumberBase { get; private set; }
     
     private void Awake()
     {
@@ -86,13 +86,13 @@ public class Base : MonoBehaviour
         }
     }
 
-    public void CreateDisplayView(BaseView baseView, int number)
+    public void CreateDisplayView(int number, Camera camera)
     {
-        _baseView = baseView;
-        
-        _baseView.SetCountResource(_countResources);
+        NumberBase = number;
         
         _baseView.SetNumberBase(number);
+        _baseView.SetCamera(camera);
+        _baseView.SetCountResource(_countResources);
     }
     
     public void ArrangeBots(Bot bot)

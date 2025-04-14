@@ -4,11 +4,6 @@ public class SpawnerBasePreview : Spawner<BasePreview>
 {
     private Transform _positionSpawn;
 
-    protected override void SetAction(BasePreview basePreview)
-    {
-        base.SetAction(basePreview);
-    }
-
     public BasePreview GetBasePreview()
     {
         return _pool.Get();

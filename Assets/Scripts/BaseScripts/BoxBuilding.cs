@@ -14,16 +14,16 @@ public class BoxBuilding : MonoBehaviour
     {
         _delayWaitForSeconds = new WaitForSeconds(_delayBulding);
     }
-
+    
+    public void CreateNewBase()
+    {
+        StartCoroutine(BuildBase());
+    }
+    
     private IEnumerator BuildBase()
     {
         yield return _delayWaitForSeconds;
         
         FinishedBuild?.Invoke();
-    }
-    
-    public void CreateNewBase()
-    {
-        StartCoroutine(BuildBase());
     }
 }

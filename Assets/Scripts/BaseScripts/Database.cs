@@ -6,30 +6,39 @@ public class Database : MonoBehaviour
 {
     [SerializeField] private BaseScanner _scanner;
     
-    private Dictionary<int, Resource> _freeResource;
+    private List<Resource> _freeResource;
     private HashSet<int> _assignedResource;
-    private List<int> _indexFreeResource;
+    
+    public event Action FoundedNewResource;
     
     public int CountFreeResource => _freeResource.Count;
 
-    public event Action FoundedNewResource;
-
     private void Awake()
     {
-        _indexFreeResource = new List<int>();
-        _freeResource = new Dictionary<int, Resource>();
+        _freeResource = new List<Resource>();
         _assignedResource = new HashSet<int>();
     }
     
     public void ProcessDetectedResource(Resource resource)
     {
-        if (_assignedResource.Contains(resource.Index) == false && _freeResource.ContainsKey(resource.Index) == false)
+        if (_assignedResource.Contains(resource.Index) == false)
         {
-            _freeResource.Add(resource.Index, resource);
-                
-            _indexFreeResource.Add(resource.Index);
+            bool isFinding = false;
+            
+            foreach (Resource freeResource in _freeResource)
+            {
+                if (resource.Index == freeResource.Index)
+                {
+                    isFinding = true;
+                }
+            }
+
+            if (isFinding == false)
+            {
+                _freeResource.Add(resource);
                     
-            FoundedNewResource?.Invoke();
+                FoundedNewResource?.Invoke();
+            }
         }
     }
     
@@ -40,21 +49,17 @@ public class Database : MonoBehaviour
 
     public Resource GetFreeResource()
     {
-        int number = _indexFreeResource[0];
+        Resource resource = _freeResource[0];
         
-        Resource resource = _freeResource[number];
+        _freeResource.Remove(_freeResource[0]);
         
-        _indexFreeResource.Remove(number);
-        
-        ChangeStatusResource(_freeResource[number]);
+        ChangeStatusResource(resource);
 
         return resource;
     }
 
     private void ChangeStatusResource(Resource resource)
     {
-        _freeResource.Remove(resource.Index);
-        
         _assignedResource.Add(resource.Index);
     }
 }
